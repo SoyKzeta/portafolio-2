@@ -1,0 +1,175 @@
+.space-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 30%, color-mix(in oklch, #6a3dff 13%, transparent) 0%, transparent 30%),
+    radial-gradient(circle at 72% 18%, color-mix(in oklch, #1fd4ff 10%, transparent) 0%, transparent 26%),
+    radial-gradient(circle at 54% 54%, color-mix(in oklch, #ff9820 14%, transparent) 0%, transparent 32%),
+    radial-gradient(circle at 46% 46%, rgba(255, 152, 44, 0.1), transparent 18%);
+}
+
+.space-shell::before,
+.space-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.space-shell::before {
+  opacity: 0.68;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(123, 73, 255, 0.42), transparent 22%),
+    radial-gradient(circle at 80% 18%, rgba(90, 123, 255, 0.3), transparent 20%),
+    radial-gradient(circle at 68% 72%, rgba(255, 111, 38, 0.22), transparent 26%),
+    radial-gradient(circle at 52% 46%, rgba(255, 170, 82, 0.12), transparent 18%);
+  filter: blur(88px);
+  animation: aurora-drift 22s ease-in-out infinite alternate;
+}
+
+.space-shell::after {
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 180px 180px;
+  mask-image: radial-gradient(circle at center, black 35%, transparent 92%);
+}
+
+.space-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px),
+    radial-gradient(circle at 64% 48%, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px),
+    radial-gradient(circle at 84% 22%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px),
+    radial-gradient(circle at 38% 76%, rgba(255, 255, 255, 0.11) 0 1px, transparent 1px);
+  background-size: 220px 220px, 320px 320px, 260px 260px, 420px 420px;
+}
+
+.frost-panel {
+  background: linear-gradient(
+    180deg,
+    rgba(18, 22, 38, 0.8) 0%,
+    rgba(9, 12, 24, 0.86) 100%
+  );
+  border: 1px solid rgba(159, 132, 255, 0.14);
+  box-shadow:
+    0 24px 80px rgba(3, 4, 12, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px rgba(58, 66, 124, 0.12),
+    0 0 36px rgba(95, 84, 180, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.panel-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.panel-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(125deg, rgba(255, 255, 255, 0.06), transparent 26%),
+    radial-gradient(circle at top right, rgba(115, 85, 255, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,0.02), transparent 35%);
+}
+
+.hud-label {
+  font-family: "Michroma", sans-serif;
+  font-size: 0.67rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.preview-grid {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(150, 136, 255, 0.22);
+  background:
+    linear-gradient(160deg, rgba(8, 10, 22, 0.92), rgba(16, 19, 33, 0.84)),
+    radial-gradient(circle at top right, rgba(114, 77, 255, 0.22), transparent 32%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 14px 30px rgba(2, 4, 12, 0.34);
+}
+
+.preview-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(transparent, rgba(255, 255, 255, 0.02)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: auto, 32px 32px, 32px 32px;
+  mask-image: linear-gradient(180deg, black, transparent 92%);
+}
+
+.preview-scanline {
+  position: absolute;
+  inset-inline: 0;
+  height: 24%;
+  background: linear-gradient(180deg, transparent, rgba(121, 87, 255, 0.16), transparent);
+  filter: blur(10px);
+  animation: preview-scan 6s ease-in-out infinite;
+}
+
+.planet-label {
+  min-width: 7.8rem;
+  color: rgba(243, 241, 255, 0.94);
+  text-shadow: 0 0 18px rgba(10, 10, 20, 0.8);
+}
+
+.planet-label span {
+  display: block;
+}
+
+.planet-label-title {
+  font-family: "Michroma", sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.planet-label-subtitle {
+  margin-top: 0.18rem;
+  font-size: 0.82rem;
+  color: rgba(214, 215, 234, 0.72);
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-1.5%, -1%, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(2%, 1.5%, 0) scale(1.08);
+  }
+}
+
+@keyframes preview-scan {
+  0%,
+  100% {
+    transform: translateY(-130%);
+  }
+  50% {
+    transform: translateY(420%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .space-shell::before,
+  .preview-scanline {
+    animation: none;
+  }
+}

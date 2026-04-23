@@ -1,0 +1,49 @@
+@import "tailwindcss";
+@import "../styles/space.css";
+
+@theme inline {
+  --font-sans: "Manrope", sans-serif;
+  --font-display: "Michroma", sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+  --space-950: oklch(0.12 0.018 274);
+  --space-900: oklch(0.16 0.025 281);
+  --space-850: oklch(0.22 0.03 279);
+  --space-800: oklch(0.28 0.04 276);
+  --text-strong: oklch(0.95 0.01 286);
+  --text-soft: oklch(0.78 0.015 282);
+  --text-muted: oklch(0.63 0.018 280);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  color: var(--text-strong);
+  background:
+    radial-gradient(circle at 16% 20%, color-mix(in oklch, #7a49ff 18%, transparent) 0%, transparent 32%),
+    radial-gradient(circle at 84% 14%, color-mix(in oklch, #4f77ff 18%, transparent) 0%, transparent 30%),
+    radial-gradient(circle at 48% 50%, color-mix(in oklch, #ff842b 12%, transparent) 0%, transparent 26%),
+    radial-gradient(circle at 50% 82%, color-mix(in oklch, #d657ff 10%, transparent) 0%, transparent 34%),
+    linear-gradient(145deg, #020309 0%, #060913 34%, #020308 100%);
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: color-mix(in oklch, #7a5cff 50%, transparent);
+  color: white;
+}
