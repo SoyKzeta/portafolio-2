@@ -4,6 +4,13 @@
 @theme inline {
   --font-sans: "Manrope", sans-serif;
   --font-display: "Michroma", sans-serif;
+  --animate-shimmer: shimmer 1.5s infinite;
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
 }
 
 :root {

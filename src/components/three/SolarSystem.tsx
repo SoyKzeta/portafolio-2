@@ -41,7 +41,7 @@ export function SolarSystem({
         <OrbitRing
           key={`orbit-${body.id}`}
           radius={body.orbitRadius}
-          color={body.secondary ? "#9a89d8" : `${body.glowColor}aa`}
+          color={body.secondary ? "#9a89d8" : body.glowColor}
         />
       ))}
 

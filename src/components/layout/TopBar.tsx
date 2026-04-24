@@ -5,12 +5,16 @@ export function TopBar() {
     <header className="pointer-events-none absolute inset-x-0 top-0 z-30 px-4 pb-3 pt-4 md:px-6 md:pt-6">
       <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4">
         <div className="pointer-events-auto frost-panel panel-sheen flex items-center gap-3 rounded-full px-4 py-3 shadow-[0_16px_48px_rgba(2,4,12,0.35)]">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/4 text-white">
-            <Orbit className="h-4 w-4" />
+          <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full p-[1px]">
+            <span className="absolute inset-0 animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0_300deg,#a78bfa_360deg)]" />
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-black/60 backdrop-blur-md">
+              <span className="bg-gradient-to-br from-violet-200 to-cyan-200 bg-clip-text font-display text-sm font-bold tracking-widest text-transparent">
+                EV
+              </span>
+            </div>
           </div>
           <div>
-            <p className="font-display text-lg tracking-[0.12em] text-white">EV</p>
-            <p className="text-xs uppercase tracking-[0.22em] text-white/45">
+            <p className="text-[0.7rem] uppercase tracking-[0.25em] text-white/50">
               Emmanuel Villegas
             </p>
           </div>

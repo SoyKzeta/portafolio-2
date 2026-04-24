@@ -293,9 +293,9 @@ export function ProjectPanel({
         {!isSystem && selectedBody && (
           <motion.aside
             key={selectedId}
-            initial={{ opacity: 0, x: 30, y: 15, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 20, y: 10, scale: 0.96 }}
+            initial={{ opacity: 0, x: 0, y: 0, scale: 0.88, filter: "blur(12px)" }}
+            animate={{ opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, x: 0, y: 0, scale: 0.92, filter: "blur(8px)" }}
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
             className="pointer-events-auto frost-panel panel-sheen flex-1 overflow-y-auto rounded-[1.75rem] p-6 [-ms-overflow-style:none] [scrollbar-width:none] md:p-8 [&::-webkit-scrollbar]:hidden"
             style={{
@@ -303,6 +303,13 @@ export function ProjectPanel({
               boxShadow: `0 28px 90px rgba(3,4,12,0.58), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px ${accent}18, 0 0 44px ${accent}12`,
             }}
           >
+            <div
+              className="absolute inset-x-0 top-0 h-[2px] rounded-t-[1.75rem] opacity-70"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+                boxShadow: `0 0 20px ${accent}`,
+              }}
+            />
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <p className="mb-2 text-[0.75rem] font-bold uppercase tracking-widest text-violet-400">{label}</p>
@@ -345,29 +352,35 @@ export function ProjectPanel({
                   href={primaryAction.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-medium text-white transition-all hover:brightness-110 active:scale-95"
+                  className="group relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-medium text-white transition-all hover:brightness-110 active:scale-95"
                   style={{
                     backgroundColor: accent,
                     boxShadow: `0 8px 20px -4px ${accent}60, inset 0 1px 0 rgba(255,255,255,0.2)`,
                     border: `1px solid ${accent}`,
                   }}
                 >
-                  {primaryAction.label}
-                  <ArrowUpRight className="h-4 w-4" />
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    {primaryAction.label}
+                    <ArrowUpRight className="h-4 w-4" />
+                  </span>
                 </a>
               ) : (
                 <button
                   type="button"
                   onClick={onSelectProjects}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-medium text-white transition-all hover:brightness-110 active:scale-95"
+                  className="group relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-medium text-white transition-all hover:brightness-110 active:scale-95"
                   style={{
                     backgroundColor: accent,
                     boxShadow: `0 8px 20px -4px ${accent}60, inset 0 1px 0 rgba(255,255,255,0.2)`,
                     border: `1px solid ${accent}`,
                   }}
                 >
-                  {primaryAction.label}
-                  <ArrowUpRight className="h-4 w-4" />
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    {primaryAction.label}
+                    <ArrowUpRight className="h-4 w-4" />
+                  </span>
                 </button>
               )}
 

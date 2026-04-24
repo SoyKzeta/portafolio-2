@@ -64,17 +64,17 @@ export function SideNav({ activeId, onSelect }: SideNavProps) {
             >
               <span
                 className={cn(
-                  "flex h-11 w-11 items-center justify-center rounded-full border transition-all",
+                  "flex h-11 w-11 items-center justify-center rounded-full border transition-all duration-300",
                   isActive
-                    ? "border-violet-300/30 bg-violet-300/12 text-violet-200 shadow-[0_0_24px_rgba(168,127,255,0.35)]"
-                    : "border-white/8 bg-white/[0.025] text-white/60 group-hover:border-white/16 group-hover:text-white/86",
+                    ? "border-violet-400/40 bg-violet-500/20 text-violet-100 shadow-[0_0_24px_rgba(168,127,255,0.4)]"
+                    : "border-white/8 bg-white/[0.02] text-white/50 group-hover:scale-110 group-hover:border-white/20 group-hover:text-white/90 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]",
                 )}
               >
                 <Icon className="h-4 w-4" />
               </span>
 
               <div className="hidden min-w-0 md:block">
-                <p className="text-[1.05rem] font-medium tracking-[0.015em]">{item.label}</p>
+                <p className={cn("text-[1.05rem] tracking-[0.015em] transition-all", isActive ? "font-semibold text-white" : "font-medium")}>{item.label}</p>
               </div>
 
               {isActive ? (
@@ -83,7 +83,7 @@ export function SideNav({ activeId, onSelect }: SideNavProps) {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute bottom-1.5 left-1/2 h-1 w-7 -translate-x-1/2 rounded-full bg-violet-300/85 shadow-[0_0_18px_rgba(181,151,255,0.75)] md:left-1.5 md:top-1/2 md:h-7 md:w-1 md:-translate-x-0 md:-translate-y-1/2"
+                  className="absolute bottom-1.5 left-1/2 h-1 w-8 -translate-x-1/2 rounded-full bg-violet-400 shadow-[0_0_20px_rgba(167,139,250,0.9),0_0_8px_rgba(167,139,250,0.8)] md:left-1 md:top-1/2 md:h-8 md:w-1 md:-translate-x-0 md:-translate-y-1/2"
                 />
               ) : null}
             </motion.button>

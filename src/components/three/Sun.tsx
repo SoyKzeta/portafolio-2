@@ -238,6 +238,32 @@ export function Sun({ reducedMotion }: SunProps) {
         </mesh>
       </Billboard>
 
+      {/* Lens Flare */}
+      <Billboard>
+        <mesh scale={[32, 0.4, 1]} rotation={[0, 0, Math.PI / 6]}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial
+            color="#ffaa44"
+            transparent
+            opacity={0.15}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+        <mesh scale={[40, 0.25, 1]} rotation={[0, 0, -Math.PI / 4]}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial
+            color="#ff8822"
+            transparent
+            opacity={0.1}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      </Billboard>
+
       <Html position={[4.2, 2.5, 0]} distanceFactor={12} className="planet-label select-none pointer-events-none">
         <div className="relative">
           <span
