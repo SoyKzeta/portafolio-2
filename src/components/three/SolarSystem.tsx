@@ -28,20 +28,23 @@ export function SolarSystem({
     if (!systemRef.current || reducedMotion) {
       return;
     }
-
-    // Slower, more majestic overall system wobble
     systemRef.current.rotation.z = -0.02 + Math.sin(state.clock.elapsedTime * 0.04) * 0.01;
   });
 
   return (
     <group ref={systemRef} rotation={[-0.22, -0.42, 0]}>
-      <Sun reducedMotion={reducedMotion} />
+      <Sun
+        reducedMotion={reducedMotion}
+        selected={selectedId === "about"}
+        onSelect={() => onSelect("about")}
+        onPositionUpdate={(pos) => onPositionUpdate("about", pos)}
+      />
 
       {solarBodies.map((body) => (
         <OrbitRing
           key={`orbit-${body.id}`}
           radius={body.orbitRadius}
-          color={body.secondary ? "#9a89d8" : body.glowColor}
+          color={body.glowColor}
         />
       ))}
 
@@ -50,6 +53,7 @@ export function SolarSystem({
           key={body.id}
           body={body}
           selected={selectedId === body.id}
+          selectedSectionId={selectedId}
           reducedMotion={reducedMotion}
           onSelect={onSelect}
           onPositionUpdate={onPositionUpdate}

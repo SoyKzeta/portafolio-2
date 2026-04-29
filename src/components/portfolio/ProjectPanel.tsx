@@ -4,18 +4,27 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight,
   Code2,
+  Download,
+  ExternalLink,
+  Mail,
   PanelRightClose,
   RadioTower,
   Sparkles,
 } from "lucide-react";
 
 import { SectionBadge } from "@/components/portfolio/SectionBadge";
-import type { SolarBody, SectionId } from "@/data/planets";
-import { featuredProject } from "@/data/projects";
+import {
+  aboutSection,
+  isProjectMoonId,
+  solarBodies,
+  systemSection,
+  type SectionId,
+  type SolarBody,
+} from "@/data/planets";
+import { featuredProject, getProjectByMoonId, type ProjectRecord } from "@/data/projects";
 
 type ProjectPanelProps = {
   selectedId: SectionId;
-  selectedBody?: SolarBody;
   onClose: () => void;
   onSelectProjects: () => void;
 };
@@ -24,7 +33,14 @@ function PreviewCard({
   variant,
   accent,
 }: {
-  variant: "overview" | "dashboard" | "profile" | "skills" | "timeline" | "signal";
+  variant:
+    | "overview"
+    | "dashboard"
+    | "profile"
+    | "skills"
+    | "timeline"
+    | "signal"
+    | "ecosystem";
   accent: string;
 }) {
   return (
@@ -38,7 +54,29 @@ function PreviewCard({
         }}
       />
 
-      {variant === "dashboard" ? (
+      {variant === "ecosystem" ? (
+        <div className="relative flex h-full items-center justify-center">
+          <div
+            className="h-20 w-20 rounded-full"
+            style={{
+              background: `radial-gradient(circle at 35% 35%, white 0%, ${accent} 55%, transparent 96%)`,
+              boxShadow: `0 0 32px ${accent}66`,
+            }}
+          />
+          {[0, 120, 240].map((angle, i) => (
+            <div
+              key={angle}
+              className="absolute h-2.5 w-2.5 rounded-full"
+              style={{
+                transform: `rotate(${angle}deg) translateY(-52px)`,
+                backgroundColor: accent,
+                boxShadow: `0 0 12px ${accent}`,
+                opacity: 0.55 + i * 0.1,
+              }}
+            />
+          ))}
+        </div>
+      ) : variant === "dashboard" ? (
         <div className="relative grid h-full grid-cols-[1.05fr_1.5fr] gap-3">
           <div className="space-y-2 rounded-2xl border border-white/8 bg-black/18 p-3">
             <div className="h-3 w-20 rounded-full bg-white/16" />
@@ -232,65 +270,110 @@ function PreviewCard({
   );
 }
 
-export function ProjectPanel({
-  selectedId,
-  selectedBody,
-  onClose,
-  onSelectProjects,
-}: ProjectPanelProps) {
-  const isSystem = selectedId === "system" || !selectedBody;
-  const accent = selectedBody?.glowColor ?? "#9a7cff";
-  const title = isSystem ? featuredProject.title : selectedBody.name;
-  const kicker = isSystem ? featuredProject.kicker : selectedBody.subtitle;
-  const label = isSystem ? "Proyecto destacado" : selectedBody.panelLabel;
-  const description = isSystem ? featuredProject.summary : selectedBody.description;
-  const secondary = isSystem ? featuredProject.detail : null;
-  const stack = isSystem ? featuredProject.stack : selectedBody.stack;
-  const previewVariant = isSystem ? "overview" : selectedBody.previewVariant;
-  const primaryAction = isSystem
-    ? {
-        label: "Ver proyecto",
-        href: featuredProject.demo,
-        external: true,
-      }
-      : selectedId === "contact"
-      ? {
-          label: "Enviar mensaje",
-          href: selectedBody.href,
-          external: true,
-        }
-      : selectedId === "about"
-      ? {
-          label: "Ver LinkedIn",
-          href: "https://www.linkedin.com/in/emmanuelvillegasurrea/",
-          external: true,
-        }
-      : selectedId === "flowsfy" || selectedId === "vivestone"
-        ? {
-            label: "Ver proyecto",
-            href: selectedBody.demo ?? featuredProject.demo,
-            external: true,
-          }
-        : {
-            label: "Ver proyectos",
-            href: null,
-            external: false,
-          };
-  const secondaryAction =
-    isSystem || selectedId === "flowsfy" || selectedId === "vivestone" || selectedId === "academic" || selectedId === "about"
-      ? {
-          label: "Ver código",
-          href: selectedBody?.github ?? featuredProject.github,
-        }
-      : {
-          label: "GitHub",
-          href: featuredProject.github,
+type ResolvedPanel =
+  | { kind: "system" }
+  | { kind: "body"; body: SolarBody }
+  | { kind: "project"; project: ProjectRecord; accent: string };
+
+function resolvePanel(selectedId: SectionId): ResolvedPanel {
+  if (selectedId === "system") {
+    return { kind: "system" };
+  }
+  if (selectedId === "about") {
+    return { kind: "body", body: aboutSection };
+  }
+  if (isProjectMoonId(selectedId)) {
+    const p = getProjectByMoonId(selectedId);
+    if (p) {
+      return { kind: "project", project: p, accent: "#ffb06e" };
+    }
+  }
+  const b = solarBodies.find((s) => s.id === selectedId);
+  if (b) {
+    return { kind: "body", body: b };
+  }
+  return { kind: "system" };
+}
+
+export function ProjectPanel({ selectedId, onClose, onSelectProjects }: ProjectPanelProps) {
+  const resolved = resolvePanel(selectedId);
+  const isSystem = resolved.kind === "system";
+  const accent =
+    resolved.kind === "body"
+      ? resolved.body.glowColor
+      : resolved.kind === "project"
+        ? resolved.accent
+        : "#9a7cff";
+
+  const { title, kicker, label, description, secondary, stack, previewVariant, metrics } =
+    (() => {
+      if (isSystem) {
+        return {
+          title: featuredProject.title,
+          kicker: featuredProject.kicker,
+          label: "Proyecto destacado (vista sistema)",
+          description: featuredProject.summary,
+          secondary: featuredProject.detail,
+          stack: featuredProject.stack,
+          previewVariant: "overview" as const,
+          metrics: null as string[] | null,
         };
+      }
+      if (resolved.kind === "body") {
+        return {
+          title: resolved.body.name,
+          kicker: resolved.body.subtitle,
+          label: resolved.body.panelLabel,
+          description: resolved.body.description,
+          secondary: null as string | null,
+          stack: resolved.body.stack,
+          previewVariant: resolved.body.previewVariant,
+          metrics: null as string[] | null,
+        };
+      }
+      return {
+        title: resolved.project.title,
+        kicker: resolved.project.kicker,
+        label: "Proyecto",
+        description: resolved.project.summary,
+        secondary: resolved.project.detail,
+        stack: resolved.project.stack,
+        previewVariant: "dashboard" as const,
+        metrics: resolved.project.metrics,
+      };
+    })();
+
+  const primaryAction = (() => {
+    if (isSystem) {
+      return { label: "Abrir proyecto", href: featuredProject.demo, external: true as const };
+    }
+    if (resolved.kind === "body") {
+      if (resolved.body.id === "contact") {
+        return { label: "Contactarme", href: resolved.body.href, external: true as const };
+      }
+      if (resolved.body.id === "about") {
+        return { label: "Ver LinkedIn", href: "https://www.linkedin.com/in/emmanuelvillegasurrea/", external: true as const };
+      }
+      if (resolved.body.id === "projects" && featuredProject.demo) {
+        return { label: "Proyecto destacado (FlowsFy)", href: featuredProject.demo, external: true as const };
+      }
+      if (resolved.body.id === "skills") {
+        return { label: "Conectar (LinkedIn)", href: "https://www.linkedin.com/in/emmanuelvillegasurrea/", external: true as const };
+      }
+    }
+    if (resolved.kind === "project" && resolved.project.demo) {
+      return { label: "Ver demo", href: resolved.project.demo, external: true as const };
+    }
+    if (resolved.kind === "project" && resolved.project.github) {
+      return { label: "Repositorio", href: resolved.project.github, external: true as const };
+    }
+    return { label: "Cerrar", href: null as null, external: false as const };
+  })();
 
   return (
     <div className="pointer-events-none absolute inset-x-4 bottom-24 z-30 flex max-h-[calc(100dvh-130px)] flex-col justify-end md:inset-x-auto md:bottom-auto md:right-6 md:top-28 md:w-[min(92vw,28rem)] md:max-h-[calc(100dvh-150px)] md:justify-start xl:right-8">
       <AnimatePresence mode="wait">
-        {!isSystem && selectedBody && (
+        {!isSystem && (
           <motion.aside
             key={selectedId}
             initial={{ opacity: 0, x: 0, y: 0, scale: 0.88, filter: "blur(12px)" }}
@@ -318,7 +401,6 @@ export function ProjectPanel({
                 </h2>
                 <p className="mt-2 text-[1.1rem] font-medium text-slate-300">{kicker}</p>
               </div>
-
               <button
                 type="button"
                 aria-label="Cerrar panel"
@@ -330,70 +412,158 @@ export function ProjectPanel({
             </div>
 
             <div className="overflow-hidden rounded-2xl border border-white/5 bg-black/10">
-              <PreviewCard variant={previewVariant} accent={accent} />
+              <PreviewCard
+                variant={
+                  previewVariant === "ecosystem" ? "ecosystem" : (previewVariant as "overview" | "dashboard" | "profile" | "skills" | "timeline" | "signal" | "ecosystem")
+                }
+                accent={accent}
+              />
             </div>
 
             <div className="mt-7 space-y-4">
               <p className="text-[1.05rem] leading-relaxed text-slate-200">{description}</p>
-              {secondary && (
-                <p className="text-[0.95rem] leading-relaxed text-slate-400">{secondary}</p>
-              )}
+              {secondary ? <p className="text-[0.95rem] leading-relaxed text-slate-400">{secondary}</p> : null}
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2">
-              {stack.map((item) => (
-                <SectionBadge key={item} label={item} accent={accent} />
-              ))}
-            </div>
+            {resolved.kind === "body" && resolved.body.stackCategories ? (
+              <div className="mt-6 space-y-4">
+                {resolved.body.stackCategories.map((cat) => (
+                  <div key={cat.label} className="space-y-2">
+                    <p className="text-xs font-bold uppercase tracking-widest text-white/45">{cat.label}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {cat.items.map((item) => (
+                        <SectionBadge key={item} label={item} accent={accent} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {stack.map((item) => (
+                  <SectionBadge key={item} label={item} accent={accent} />
+                ))}
+                {metrics?.map((m) => (
+                  <span
+                    key={m}
+                    className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-[0.7rem] font-medium text-white/75"
+                  >
+                    {m}
+                  </span>
+                ))}
+              </div>
+            )}
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              {primaryAction.external && primaryAction.href ? (
+            {resolved.kind === "body" && resolved.body.id === "contact" ? (
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                {resolved.body.href ? (
+                  <a
+                    href={resolved.body.href}
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-[0.95rem] font-medium text-white transition-all hover:brightness-110"
+                    style={{
+                      backgroundColor: accent,
+                      boxShadow: `0 8px 20px -4px ${accent}60`,
+                    }}
+                  >
+                    <Mail className="h-4 w-4" />
+                    Contactarme
+                  </a>
+                ) : null}
+                {resolved.body.github ? (
+                  <a
+                    href={resolved.body.github}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-[0.95rem] font-medium text-slate-200 transition-all hover:bg-white/10"
+                  >
+                    <Code2 className="h-4 w-4" />
+                    Ver GitHub
+                  </a>
+                ) : null}
+                {resolved.body.CV_PATH ? (
+                  <a
+                    href={resolved.body.CV_PATH}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-black/20 px-4 py-3 text-[0.95rem] text-slate-200 hover:bg-white/5"
+                    download
+                  >
+                    <Download className="h-4 w-4" />
+                    CV
+                  </a>
+                ) : null}
                 <a
-                  href={primaryAction.href}
+                  href="https://www.linkedin.com/in/emmanuelvillegasurrea/"
                   target="_blank"
                   rel="noreferrer"
-                  className="group relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-medium text-white transition-all hover:brightness-110 active:scale-95"
-                  style={{
-                    backgroundColor: accent,
-                    boxShadow: `0 8px 20px -4px ${accent}60, inset 0 1px 0 rgba(255,255,255,0.2)`,
-                    border: `1px solid ${accent}`,
-                  }}
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[0.95rem] text-slate-200 hover:bg-white/10"
                 >
-                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
-                  <span className="relative z-10 flex items-center gap-2">
-                    {primaryAction.label}
-                    <ArrowUpRight className="h-4 w-4" />
-                  </span>
+                  <ExternalLink className="h-4 w-4" />
+                  LinkedIn
                 </a>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onSelectProjects}
-                  className="group relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-[0.95rem] font-medium text-white transition-all hover:brightness-110 active:scale-95"
-                  style={{
-                    backgroundColor: accent,
-                    boxShadow: `0 8px 20px -4px ${accent}60, inset 0 1px 0 rgba(255,255,255,0.2)`,
-                    border: `1px solid ${accent}`,
-                  }}
-                >
-                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
-                  <span className="relative z-10 flex items-center gap-2">
-                    {primaryAction.label}
-                    <ArrowUpRight className="h-4 w-4" />
-                  </span>
-                </button>
-              )}
+              </div>
+            ) : (
+              <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                {primaryAction.href ? (
+                  <a
+                    href={primaryAction.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-3 text-[0.95rem] font-medium text-white transition-all hover:brightness-110 active:scale-95"
+                    style={{
+                      backgroundColor: accent,
+                      boxShadow: `0 8px 20px -4px ${accent}60, inset 0 1px 0 rgba(255,255,255,0.2)`,
+                      border: `1px solid ${accent}`,
+                    }}
+                  >
+                    <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+                    <span className="relative z-10 flex items-center gap-2">
+                      {primaryAction.label}
+                      <ArrowUpRight className="h-4 w-4" />
+                    </span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onSelectProjects}
+                    className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-3 text-[0.95rem] font-medium text-white transition-all hover:brightness-110 active:scale-95"
+                    style={{
+                      backgroundColor: accent,
+                      boxShadow: `0 8px 20px -4px ${accent}60, inset 0 1px 0 rgba(255,255,255,0.2)`,
+                      border: `1px solid ${accent}`,
+                    }}
+                  >
+                    <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+                    <span className="relative z-10">Ir a Proyectos (escena 3D)</span>
+                  </button>
+                )}
 
-              <a
-                href={secondaryAction.href}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-[0.95rem] font-medium text-slate-300 transition-all hover:bg-white/10 hover:text-white active:scale-95"
-              >
-                {secondaryAction.label}
-                <Code2 className="h-4 w-4" />
-              </a>
-            </div>
+                {resolved.kind === "project" &&
+                resolved.project.github &&
+                primaryAction.href !== resolved.project.github ? (
+                  <a
+                    href={resolved.project.github}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-[0.95rem] font-medium text-slate-300 transition-all hover:bg-white/10"
+                  >
+                    Código
+                    <Code2 className="h-4 w-4" />
+                  </a>
+                ) : null}
+                {resolved.kind === "body" && resolved.body.github && resolved.body.id !== "contact" ? (
+                  <a
+                    href={resolved.body.github}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-[0.95rem] font-medium text-slate-300 transition-all hover:bg-white/10"
+                  >
+                    GitHub
+                    <Code2 className="h-4 w-4" />
+                  </a>
+                ) : null}
+              </div>
+            )}
           </motion.aside>
         )}
       </AnimatePresence>

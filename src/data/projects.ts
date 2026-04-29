@@ -1,3 +1,7 @@
+/**
+ * Cada luna (project moon) tiene un `slug` que coincide con `ProjectMoonId` y `SectionId` en el escenario 3D.
+ * Edita títulos, copy y enlaces aquí.
+ */
 export type ProjectRecord = {
   slug: string;
   title: string;
@@ -14,41 +18,79 @@ export const projects: ProjectRecord[] = [
   {
     slug: "flowsfy",
     title: "FlowsFy",
-    kicker: "Plataforma SaaS Multi-tenant con IA",
+    kicker: "SaaS multi-tenant con IA y WhatsApp",
     summary:
-      "SaaS para tiendas físicas que automatiza la atención al cliente por WhatsApp, gestión de inventario, pedidos y facturación electrónica (DIAN).",
+      "Plataforma operativa para tiendas físicas: bot de atención con modelos de lenguaje, inventario, medios de pago y trazabilidad con colas y workers.",
     detail:
-      "Diseño y desarrollo completo desde cero: arquitectura multi-tenant, bot de WhatsApp con Anthropic Claude, pagos con Wompi, y procesamiento asíncrono de alta concurrencia usando BullMQ y Redis.",
-    stack: ["Next.js 14", "Node.js", "TypeScript", "PostgreSQL", "Prisma", "BullMQ", "Redis"],
+      "Arquitectura multi-tenant, integración con WhatsApp Cloud, Anthropic Claude, pagos (Wompi) y orquestación asíncrona con BullMQ, Redis y APIs propias. Desde producto a despliegue, con visibilidad y fiabilidad para concurrencia real.",
+    stack: ["Next.js 14", "Node.js", "TypeScript", "Prisma", "BullMQ", "Redis", "Claude API"],
     demo: "https://flowsfy.com",
-    github: "https://github.com/soykzeta",
-    metrics: ["IA (Claude API)", "WhatsApp Cloud", "Facturación DIAN", "Wompi"],
+    github: "https://github.com/SoyKzeta",
+    metrics: ["IA (Claude)", "WhatsApp", "Pagos Wompi", "Multi-tenant"],
   },
   {
     slug: "vivestone",
     title: "ViveStone",
-    kicker: "Sitio Comercial Premium",
+    kicker: "Web comercial y catálogo B2B",
     summary:
-      "Plataforma corporativa para distribuidores de cuarzos y sinterizados premium con catálogo vivo y flujo de cotización.",
+      "Sitio corporativo para un vertical de materiales premium, con catálogo, narrativa y capado de generación de leads; orientado a conversión y búsqueda orgánica.",
     detail:
-      "Desarrollo full-stack enfocado en performance, SEO y conversión. Incluye catálogo filtrable, galería de proyectos y un sistema de captura de leads conectado a APIs propias para notificaciones.",
-    stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "API Routes"],
+      "Diseño de recorrido, SEO técnico, galería de proyectos y conectores a formularios y notificaciones. Código y contenido afinado para carga, accesibilidad básica y trazas de origen de contacto.",
+    stack: ["Next.js", "React", "TypeScript", "Tailwind", "Vercel"],
     demo: "https://vivestone.co",
-    github: "https://github.com/soykzeta",
-    metrics: ["Catálogo Dinámico", "Lead Flow", "SEO Optimizado"],
+    github: "https://github.com/SoyKzeta",
+    metrics: ["SEO", "Conversión", "Catálogo", "Leads"],
   },
   {
-    slug: "academic",
-    title: "Proyectos Académicos",
-    kicker: "Ingeniería de Software & Arquitectura",
+    slug: "parking",
+    title: "Sistema de parqueaderos",
+    kicker: "Gestión, ingresos y operación de parkings",
     summary:
-      "Sistemas de administración, aplicaciones móviles, bodegas de datos (ETL) y aseguramiento de calidad (QA).",
+      "Software de administración de plazas, arqueo y trazos operativos; integra reportes (Power BI) y lógica de reservas o asignación, según requisito académico y de negocio.",
     detail:
-      "Desarrollo de software de parqueaderos con Power BI, apps de inventario en Spring Boot, apps móviles en React Native con Firebase, y aplicación de pruebas (Selenium, Cypress, TestRail).",
-    stack: ["Java", "Spring Boot", "React Native", "SQL Server", "Power BI", "Firebase"],
-    github: "https://github.com/soykzeta",
-    metrics: ["Arquitectura", "ETL & Data", "QA & Testing", "Scrum/Kanban"],
+      "Diseño de módulos de acceso, tarifas y caja; exportación a BI; foco en claridad operativa y soportes a decisión. Stack acorde al contexto de estudio o cliente (JVM, SQL, ETL en pipeline de datos).",
+    stack: ["Java / Spring (según módulo)", "SQL", "ETL", "Power BI"],
+    metrics: ["Operación", "BI", "Backoffice", "Caja"],
+  },
+  {
+    slug: "inventory-rentals",
+    title: "Inventario y alquileres",
+    kicker: "Stock, turnos y control de arrendamientos",
+    summary:
+      "Aplicación para inventario crítico, historiales de alquiler y mínimos/alertas; adecuada a escenarios con activos móviles o equipos compartidos.",
+    detail:
+      "Modelo de entidades, movimientos, roles y trazas; con foco en consistencia, integración con repositorio de productos e informes. Presentación móvil o web según alcance de cada fase del proyecto.",
+    stack: ["Spring / REST", "React / React Native", "SQL", "Autenticación básica"],
+    metrics: ["Inventario", "Alquileres", "Alertas", "Móvil"],
+  },
+  {
+    slug: "restaurant-app",
+    title: "App móvil restaurante",
+    kicker: "Pedido, mesa y backoffice",
+    summary:
+      "Aplicación para carta, pedido y comuniación con cocina; incluye módulo de caja o sync según alcance académico, con atención a usabilidad en campo.",
+    detail:
+      "Sincronización, estados de pedido y mínima offline tolerancia. Integración con backend REST y, cuando aplica, push o colas; prioridad en flujo claro para staff y comensal.",
+    stack: ["React Native", "Firebase o REST", "Node", "Diseño UI móvil"],
+    metrics: ["Móvil", "Pedidos", "Restauración", "UX en campo"],
   },
 ];
 
 export const featuredProject = projects[0];
+
+const slugSet = (projects as ProjectRecord[]).map((p) => p.slug);
+
+export function projectBySlug(slug: string): ProjectRecord | undefined {
+  return projects.find((p) => p.slug === slug);
+}
+
+/**
+ * Mapea una luna 3D (mismo `slug` que en `ProjectMoonId`) a su ficha
+ */
+export function getProjectByMoonId(id: string): ProjectRecord | undefined {
+  return slugSet.includes(id) ? projectBySlug(id) : undefined;
+}
+
+export function isProjectSlug(id: string): boolean {
+  return slugSet.includes(id);
+}

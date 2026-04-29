@@ -2,27 +2,27 @@
 
 import { Billboard, Html, useCursor, useTexture } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
-import type { SolarBody } from "@/data/planets";
-import {
-  createRadialTexture,
-} from "@/lib/space-textures";
+import { ProjectMoons } from "@/components/three/ProjectMoons";
+import type { SolarBody, SectionId } from "@/data/planets";
+import { createRadialTexture } from "@/lib/space-textures";
+import { Textures } from "@/lib/texture-assets";
 
 type PlanetProps = {
   body: SolarBody;
   selected: boolean;
+  selectedSectionId: SectionId;
   reducedMotion: boolean;
-  onSelect: (id: SolarBody["id"]) => void;
-  onPositionUpdate: (id: SolarBody["id"], position: THREE.Vector3) => void;
+  onSelect: (id: SectionId) => void;
+  onPositionUpdate: (id: Exclude<SectionId, "system">, position: THREE.Vector3) => void;
 };
-
-const TEXTURE_VERSION = "20260423-2";
 
 export function Planet({
   body,
   selected,
+  selectedSectionId,
   reducedMotion,
   onSelect,
   onPositionUpdate,
@@ -34,102 +34,69 @@ export function Planet({
   const worldPositionRef = useRef(new THREE.Vector3());
   const [hovered, setHovered] = useState(false);
   const glowTexture = useMemo(
-    () => createRadialTexture("rgba(255,255,255,0.95)", `${body.glowColor}00`, 768),
-    [body.glowColor],
+    () => createRadialTexture("rgba(255,255,255,0.5)", "rgba(255,255,255,0)", 768),
+    [],
   );
   const haloTexture = useMemo(
-    () => createRadialTexture(`${body.glowColor}cc`, `${body.glowColor}00`, 768),
-    [body.glowColor],
+    () => createRadialTexture("rgba(255,255,255,0.35)", "rgba(255,255,255,0)", 768),
+    [],
   );
 
   const haloMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
   const glowMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
   const { gl } = useThree();
 
-  const textureUrl = useMemo(() => {
+  const skinUrl = useMemo(() => {
     switch (body.id) {
-      case "about":
-        return `/textures/planets/sobremi2.jpg?v=${TEXTURE_VERSION}`;
-      case "flowsfy":
-        return `/textures/planets/proyectos.png?v=${TEXTURE_VERSION}`;
-      case "vivestone":
-        return `/textures/planets/sobre-mi.png?v=${TEXTURE_VERSION}`;
-      case "academic":
-        return `/textures/planets/contacto.png?v=${TEXTURE_VERSION}`;
+      case "projects":
+        return Textures.planetProjects;
       case "skills":
-        return `/textures/planets/skills.png?v=${TEXTURE_VERSION}`;
+        return Textures.planetSkills;
       case "contact":
-        return `/textures/planets/contacto2.jpg?v=${TEXTURE_VERSION}`;
+        return Textures.planetContact;
       default:
-        return `/textures/planets/contacto.png?v=${TEXTURE_VERSION}`;
+        return Textures.planetContact;
     }
   }, [body.id]);
 
-  const surfaceTexture = useTexture(textureUrl);
-  useMemo(() => {
-    surfaceTexture.colorSpace = THREE.SRGBColorSpace;
-    surfaceTexture.wrapS = THREE.RepeatWrapping;
-    surfaceTexture.wrapT = THREE.ClampToEdgeWrapping;
-    surfaceTexture.anisotropy = gl.capabilities.getMaxAnisotropy();
-    surfaceTexture.minFilter = THREE.LinearMipmapLinearFilter;
-    surfaceTexture.magFilter = THREE.LinearFilter;
-    surfaceTexture.needsUpdate = true;
-  }, [gl, surfaceTexture]);
+  const skinMap = useTexture(skinUrl);
 
-  const ringTexture = useTexture("/textures/8k_saturn_ring_alpha.png");
-  useMemo(() => {
-    ringTexture.colorSpace = THREE.SRGBColorSpace;
-    ringTexture.wrapS = THREE.ClampToEdgeWrapping;
-    ringTexture.wrapT = THREE.ClampToEdgeWrapping;
-    ringTexture.needsUpdate = true;
-  }, [ringTexture]);
+  useLayoutEffect(() => {
+    skinMap.colorSpace = THREE.SRGBColorSpace;
+    skinMap.wrapS = THREE.RepeatWrapping;
+    skinMap.wrapT = THREE.ClampToEdgeWrapping;
+    skinMap.anisotropy = gl.capabilities.getMaxAnisotropy();
+    skinMap.minFilter = THREE.LinearMipmapLinearFilter;
+    skinMap.magFilter = THREE.LinearFilter;
+    skinMap.needsUpdate = true;
+  }, [gl, skinMap]);
 
   const materialProps = useMemo(() => {
     switch (body.id) {
-      case "flowsfy":
+      case "projects":
         return {
-          roughness: 0.85,
-          metalness: 0.05,
+          roughness: 0.75,
+          metalness: 0.04,
           clearcoat: 0.0,
           clearcoatRoughness: 0.5,
-          emissiveIntensity: selected ? 2.0 : hovered ? 1.5 : 0.8,
-        };
-      case "about":
-        return {
-          roughness: 0.3,
-          metalness: 0.15,
-          clearcoat: 0.5,
-          clearcoatRoughness: 0.2,
-          emissiveIntensity: selected ? 0.6 : hovered ? 0.4 : 0.15,
-        };
-      case "vivestone":
-        return {
-          roughness: 0.4,
-          metalness: 0.1,
-          clearcoat: 0.3,
-          clearcoatRoughness: 0.3,
-          emissiveIntensity: selected ? 0.8 : hovered ? 0.5 : 0.2,
         };
       case "skills":
         return {
           roughness: 0.7,
           metalness: 0.0,
-          clearcoat: 0.1,
-          clearcoatRoughness: 0.4,
-          emissiveIntensity: selected ? 0.8 : hovered ? 0.5 : 0.2,
+          clearcoat: 0.05,
+          clearcoatRoughness: 0.45,
         };
       case "contact":
-      case "academic":
       default:
         return {
-          roughness: 0.6,
-          metalness: 0.1,
-          clearcoat: 0.1,
-          clearcoatRoughness: 0.35,
-          emissiveIntensity: selected ? 0.7 : hovered ? 0.4 : 0.2,
+          roughness: 0.62,
+          metalness: 0.08,
+          clearcoat: 0.06,
+          clearcoatRoughness: 0.38,
         };
     }
-  }, [body.id, selected, hovered]);
+  }, [body.id]);
 
   useCursor(hovered);
 
@@ -139,25 +106,21 @@ export function Planet({
     }
 
     const time = reducedMotion ? 0 : state.clock.elapsedTime;
-    // Slow down the orbit speed significantly for a cinematic feel
     const angle = body.initialAngle + time * body.orbitSpeed * 0.35;
     const radius = body.orbitRadius;
     const x = Math.cos(angle) * radius;
     const z = Math.sin(angle) * radius;
-    
-    // Smoother, slower vertical bobbing
     const y = Math.sin(time * 0.12 + body.initialAngle) * body.verticalRange * 0.6;
 
     groupRef.current.position.set(x, y, z);
-    
-    // Slower, more deliberate self-rotation
+
     meshRef.current.rotation.y += delta * (0.04 + body.size * 0.015);
     meshRef.current.rotation.x = Math.sin(time * 0.1 + body.initialAngle) * 0.05;
     if (ringRef.current) {
       ringRef.current.rotation.z += delta * 0.12;
     }
 
-    const scaleTarget = selected ? 1.18 + Math.sin(time * 2.5) * 0.02 : hovered ? 1.14 : 1;
+    const scaleTarget = selected ? 1.16 + Math.sin(time * 2.5) * 0.018 : hovered ? 1.12 : 1;
     const blend = 1 - Math.exp(-delta * 7.4);
     groupRef.current.scale.lerp(
       new THREE.Vector3(scaleTarget, scaleTarget, scaleTarget),
@@ -165,29 +128,33 @@ export function Planet({
     );
     glowRef.current.scale.lerp(
       new THREE.Vector3(
-        selected ? 1.25 : hovered ? 1.18 : 1,
-        selected ? 1.25 : hovered ? 1.18 : 1,
-        selected ? 1.25 : hovered ? 1.18 : 1,
+        selected ? 1.2 : hovered ? 1.14 : 1,
+        selected ? 1.2 : hovered ? 1.14 : 1,
+        selected ? 1.2 : hovered ? 1.14 : 1,
       ),
       blend,
     );
 
-    // Distance-based glow variation and pulsing
     const dist = state.camera.position.distanceTo(groupRef.current.position);
     const distFactor = THREE.MathUtils.clamp((dist - 10) / 30, 0, 1);
-    
-    const baseHalo = selected ? 0.55 + Math.sin(time * 3) * 0.1 : hovered ? 0.45 : 0.18;
-    const baseGlow = selected ? 0.18 : hovered ? 0.1 : 0.05;
-    
-    // Attenuate by distance (further = softer/more transparent)
+    const baseHalo = selected ? 0.18 + Math.sin(time * 3) * 0.04 : hovered ? 0.12 : 0.05;
+    const baseGlow = selected ? 0.06 : hovered ? 0.04 : 0.018;
     const targetHaloOpacity = baseHalo * (1 - distFactor * 0.4);
     const targetGlowOpacity = baseGlow * (1 - distFactor * 0.4);
 
     if (haloMaterialRef.current) {
-      haloMaterialRef.current.opacity = THREE.MathUtils.lerp(haloMaterialRef.current.opacity, targetHaloOpacity, 0.1);
+      haloMaterialRef.current.opacity = THREE.MathUtils.lerp(
+        haloMaterialRef.current.opacity,
+        targetHaloOpacity,
+        0.1,
+      );
     }
     if (glowMaterialRef.current) {
-      glowMaterialRef.current.opacity = THREE.MathUtils.lerp(glowMaterialRef.current.opacity, targetGlowOpacity, 0.1);
+      glowMaterialRef.current.opacity = THREE.MathUtils.lerp(
+        glowMaterialRef.current.opacity,
+        targetGlowOpacity,
+        0.1,
+      );
     }
 
     groupRef.current.getWorldPosition(worldPositionRef.current);
@@ -212,60 +179,50 @@ export function Planet({
       >
         <sphereGeometry args={[body.size, 72, 72]} />
         <meshPhysicalMaterial
-          map={surfaceTexture}
+          map={skinMap}
           color="#ffffff"
-          emissiveMap={surfaceTexture}
-          emissive={body.emissiveColor}
-          emissiveIntensity={materialProps.emissiveIntensity}
+          emissive="#000000"
+          emissiveIntensity={0}
           roughness={materialProps.roughness}
           metalness={materialProps.metalness}
           clearcoat={materialProps.clearcoat}
           clearcoatRoughness={materialProps.clearcoatRoughness}
-          sheen={0.32}
-          sheenColor={new THREE.Color(body.glowColor)}
+          sheen={0}
           transparent={false}
-          depthWrite={true}
+          depthWrite
         />
       </mesh>
 
-      <mesh scale={1.04}>
+      {body.id === "projects" ? (
+        <ProjectMoons
+          selectedSectionId={selectedSectionId}
+          reducedMotion={reducedMotion}
+          onSelect={onSelect}
+          onMoonPositionUpdate={(id, v) => onPositionUpdate(id, v)}
+        />
+      ) : null}
+
+      <mesh scale={1.02}>
         <sphereGeometry args={[body.size, 48, 48]} />
         <meshBasicMaterial
-          color={body.glowColor}
+          color="#ffffff"
           transparent
-          opacity={selected ? 0.12 : hovered ? 0.08 : 0.03}
+          opacity={selected ? 0.045 : hovered ? 0.03 : 0.012}
           side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
           depthWrite={false}
-          toneMapped={false}
+          toneMapped
         />
       </mesh>
 
-      <mesh scale={1.09}>
-        <sphereGeometry args={[body.size, 48, 48]} />
-        <meshBasicMaterial
-          color={body.glowColor}
-          transparent
-          opacity={selected ? 0.08 : hovered ? 0.05 : 0.015}
-          side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          toneMapped={false}
-        />
-      </mesh>
-
-      {body.hasRing && ringTexture ? (
+      {body.hasRing ? (
         <group ref={ringRef} rotation={[Math.PI / 2, 0.16, 0]}>
           <mesh>
             <ringGeometry args={[body.size * 1.42, body.size * 2.12, 320]} />
             <meshBasicMaterial
-              map={ringTexture}
-              color="#ffffff"
+              color={body.ringColor ?? body.glowColor}
               transparent
-              opacity={0.95}
-              alphaTest={0.02}
+              opacity={0.42}
               side={THREE.DoubleSide}
-              blending={THREE.NormalBlending}
               depthWrite={false}
               toneMapped={false}
             />

@@ -10,7 +10,7 @@ type BottomHintProps = {
 const hints = [
   { icon: Move3D, label: "Arrastra para rotar" },
   { icon: ScanSearch, label: "Scroll para zoom" },
-  { icon: MousePointer2, label: "Haz clic en un planeta" },
+  { icon: MousePointer2, label: "Clic: sol, planetas o satélites" },
 ];
 
 export function BottomHint({ onReset }: BottomHintProps) {

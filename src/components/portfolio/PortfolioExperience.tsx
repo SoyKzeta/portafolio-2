@@ -8,17 +8,26 @@ import { SideNav } from "@/components/layout/SideNav";
 import { TopBar } from "@/components/layout/TopBar";
 import { ProjectPanel } from "@/components/portfolio/ProjectPanel";
 import { SpaceScene } from "@/components/three/SpaceScene";
-import { solarBodies, systemSection, type SectionId } from "@/data/planets";
+import { aboutSection, isProjectMoonId, solarBodies, systemSection, type SectionId } from "@/data/planets";
+import { getProjectByMoonId } from "@/data/projects";
 
 export function PortfolioExperience() {
   const prefersReducedMotion = useReducedMotion();
   const [selectedId, setSelectedId] = useState<SectionId>("system");
   const [resetToken, setResetToken] = useState(0);
 
-  const selectedBody = useMemo(
-    () => solarBodies.find((body) => body.id === selectedId),
-    [selectedId],
-  );
+  const sectionLabel = useMemo(() => {
+    if (selectedId === "system") {
+      return systemSection.name;
+    }
+    if (selectedId === "about") {
+      return aboutSection.name;
+    }
+    if (isProjectMoonId(selectedId)) {
+      return getProjectByMoonId(selectedId)?.title;
+    }
+    return solarBodies.find((body) => body.id === selectedId)?.name;
+  }, [selectedId]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -48,9 +57,8 @@ export function PortfolioExperience() {
 
       <ProjectPanel
         selectedId={selectedId}
-        selectedBody={selectedBody}
         onClose={() => setSelectedId("system")}
-        onSelectProjects={() => setSelectedId("flowsfy")}
+        onSelectProjects={() => setSelectedId("projects")}
       />
 
       <BottomHint
@@ -61,7 +69,7 @@ export function PortfolioExperience() {
       />
 
       <div className="pointer-events-none absolute bottom-6 right-4 z-30 hidden rounded-full border border-white/10 bg-black/24 px-4 py-2 text-xs uppercase tracking-[0.24em] text-white/45 backdrop-blur-xl md:block">
-        {selectedBody?.name ?? systemSection.name}
+        {sectionLabel ?? systemSection.name}
       </div>
     </main>
   );
